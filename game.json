@@ -1,0 +1,15 @@
+{
+  "id": "estrelas-da-ciencia",
+  "nome": "Estrelas da Ciência",
+  "versao": "1.0.0",
+  "autores": ["Pedro Paglioni", "Isac Victor", "Eliabe Loureiro"],
+  "descricao": "Atire na nave com a resposta certa e conheça grandes cientistas.",
+  "controles": "Setas movem a nave, espaço atira.",
+  "entrada": "index.html",
+  "capa": "capa.png",
+  "classico_referencia": "Space Invaders",
+  "mecanica": "tiro",
+  "tema": "Mulheres na Ciência",
+  "nivel": "ensino médio",
+  "questoes": "questoes.json"
+}

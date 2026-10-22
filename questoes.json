@@ -1,0 +1,370 @@
+{
+  "tema": "Mulheres na Ciência",
+  "nivel": "ensino médio",
+  "questoes": [
+    {
+      "id": "q01",
+      "enunciado": "Quem descobriu o polônio e o rádio?",
+      "alternativas": [
+        "Ada Lovelace",
+        "Marie Curie",
+        "Jane Goodall",
+        "Mary Anning"
+      ],
+      "correta": 1,
+      "explicacao": "Marie e Pierre Curie, em 1898.",
+      "fonte": "https://pt.wikipedia.org/wiki/Marie_Curie"
+    },
+    {
+      "id": "q02",
+      "enunciado": "Quantos Nobel Marie Curie ganhou?",
+      "alternativas": [
+        "2",
+        "1",
+        "3",
+        "4"
+      ],
+      "correta": 0,
+      "explicacao": "Física em 1903 e Química em 1911.",
+      "fonte": "https://pt.wikipedia.org/wiki/Marie_Curie"
+    },
+    {
+      "id": "q03",
+      "enunciado": "Quem programou a máquina de Babbage?",
+      "alternativas": [
+        "Grace Hopper",
+        "Hipátia",
+        "Rachel Carson",
+        "Ada Lovelace"
+      ],
+      "correta": 3,
+      "explicacao": "Ada Lovelace: notas e algoritmo, 1843.",
+      "fonte": "https://pt.wikipedia.org/wiki/Ada_Lovelace"
+    },
+    {
+      "id": "q04",
+      "enunciado": "Quem criou o primeiro compilador?",
+      "alternativas": [
+        "Katherine Johnson",
+        "Rosalind Franklin",
+        "Grace Hopper",
+        "Vera Rubin"
+      ],
+      "correta": 2,
+      "explicacao": "Grace Hopper, em 1952 (sistema A-0).",
+      "fonte": "https://pt.wikipedia.org/wiki/Grace_Hopper"
+    },
+    {
+      "id": "q05",
+      "enunciado": "Quem obteve a Foto 51, do DNA?",
+      "alternativas": [
+        "Barbara McClintock",
+        "Rosalind Franklin",
+        "Jane Goodall",
+        "Lise Meitner"
+      ],
+      "correta": 1,
+      "explicacao": "Franklin e Gosling, por raios X, 1952.",
+      "fonte": "https://pt.wikipedia.org/wiki/Rosalind_Franklin"
+    },
+    {
+      "id": "q06",
+      "enunciado": "Com Frisch, quem explicou a fissão?",
+      "alternativas": [
+        "Lise Meitner",
+        "Hipátia",
+        "Vera Rubin",
+        "Grace Hopper"
+      ],
+      "correta": 0,
+      "explicacao": "Meitner e Frisch, entre 1938 e 1939.",
+      "fonte": "https://pt.wikipedia.org/wiki/Lise_Meitner"
+    },
+    {
+      "id": "q07",
+      "enunciado": "Quem calculou a órbita de Glenn?",
+      "alternativas": [
+        "Marie Curie",
+        "Jane Goodall",
+        "Rachel Carson",
+        "Katherine Johnson"
+      ],
+      "correta": 3,
+      "explicacao": "Katherine Johnson, matemática da NASA.",
+      "fonte": "https://pt.wikipedia.org/wiki/Katherine_Johnson"
+    },
+    {
+      "id": "q08",
+      "enunciado": "Primeira mulher negra a ir ao espaço?",
+      "alternativas": [
+        "V. Tereshkova",
+        "Katherine Johnson",
+        "Mae Jemison",
+        "Vera Rubin"
+      ],
+      "correta": 2,
+      "explicacao": "Mae Jemison voou na Endeavour, 1992.",
+      "fonte": "https://pt.wikipedia.org/wiki/Mae_Jemison"
+    },
+    {
+      "id": "q09",
+      "enunciado": "Primeira mulher no espaço?",
+      "alternativas": [
+        "Mae Jemison",
+        "V. Tereshkova",
+        "Katherine Johnson",
+        "Margaret Hamilton"
+      ],
+      "correta": 1,
+      "explicacao": "Voou na Vostok 6, em 1963.",
+      "fonte": "https://pt.wikipedia.org/wiki/Valentina_Tereshkova"
+    },
+    {
+      "id": "q10",
+      "enunciado": "Quem descobriu os pulsares em 1967?",
+      "alternativas": [
+        "Jocelyn Bell",
+        "Vera Rubin",
+        "Henrietta Leavitt",
+        "Mary Anning"
+      ],
+      "correta": 0,
+      "explicacao": "Foi feito quando era estudante.",
+      "fonte": "https://pt.wikipedia.org/wiki/Jocelyn_Bell_Burnell"
+    },
+    {
+      "id": "q11",
+      "enunciado": "Quem ligou brilho e período das cefeidas?",
+      "alternativas": [
+        "Jocelyn Bell",
+        "Vera Rubin",
+        "Emmy Noether",
+        "Henrietta Leavitt"
+      ],
+      "correta": 3,
+      "explicacao": "Isso ajudou a medir distâncias no cosmos.",
+      "fonte": "https://pt.wikipedia.org/wiki/Henrietta_Swan_Leavitt"
+    },
+    {
+      "id": "q12",
+      "enunciado": "Quem descobriu os transposons?",
+      "alternativas": [
+        "Rosalind Franklin",
+        "Dorothy Hodgkin",
+        "Barbara McClintock",
+        "Rachel Carson"
+      ],
+      "correta": 2,
+      "explicacao": "Genes que mudam de lugar. Nobel, 1983.",
+      "fonte": "https://pt.wikipedia.org/wiki/Barbara_McClintock"
+    },
+    {
+      "id": "q13",
+      "enunciado": "Quem ganhou o Nobel de Química de 1964?",
+      "alternativas": [
+        "Marie Curie",
+        "Dorothy Hodgkin",
+        "Lise Meitner",
+        "Rosalind Franklin"
+      ],
+      "correta": 1,
+      "explicacao": "Estruturas como a da vitamina B12.",
+      "fonte": "https://pt.wikipedia.org/wiki/Dorothy_Hodgkin"
+    },
+    {
+      "id": "q14",
+      "enunciado": "Quem escreveu Primavera Silenciosa?",
+      "alternativas": [
+        "Rachel Carson",
+        "Jane Goodall",
+        "Bertha Lutz",
+        "Mary Anning"
+      ],
+      "correta": 0,
+      "explicacao": "Livro de 1962 sobre os pesticidas.",
+      "fonte": "https://pt.wikipedia.org/wiki/Rachel_Carson"
+    },
+    {
+      "id": "q15",
+      "enunciado": "Quem estudou chimpanzés em Gombe?",
+      "alternativas": [
+        "Rachel Carson",
+        "Mary Anning",
+        "Bertha Lutz",
+        "Jane Goodall"
+      ],
+      "correta": 3,
+      "explicacao": "Na Tanzânia, a partir de 1960.",
+      "fonte": "https://pt.wikipedia.org/wiki/Jane_Goodall"
+    },
+    {
+      "id": "q16",
+      "enunciado": "Bióloga que lutou pelo voto feminino?",
+      "alternativas": [
+        "Nise da Silveira",
+        "Rachel Carson",
+        "Bertha Lutz",
+        "Jane Goodall"
+      ],
+      "correta": 2,
+      "explicacao": "Bertha Lutz, zoóloga brasileira.",
+      "fonte": "https://pt.wikipedia.org/wiki/Bertha_Lutz"
+    },
+    {
+      "id": "q17",
+      "enunciado": "Psiquiatra que usou arte como terapia?",
+      "alternativas": [
+        "Bertha Lutz",
+        "Nise da Silveira",
+        "Marie Curie",
+        "Grace Hopper"
+      ],
+      "correta": 1,
+      "explicacao": "Nise da Silveira, no Brasil.",
+      "fonte": "https://pt.wikipedia.org/wiki/Nise_da_Silveira"
+    },
+    {
+      "id": "q18",
+      "enunciado": "Quem sequenciou o coronavírus em 48h?",
+      "alternativas": [
+        "J. Goes de Jesus",
+        "Nise da Silveira",
+        "Bertha Lutz",
+        "Tu Youyou"
+      ],
+      "correta": 0,
+      "explicacao": "Equipe liderada por ela, em fev. de 2020.",
+      "fonte": "https://en.wikipedia.org/wiki/Jaqueline_Go%C3%A9s_de_Jesus"
+    },
+    {
+      "id": "q19",
+      "enunciado": "Nobel 2020 de Doudna e Charpentier?",
+      "alternativas": [
+        "PCR",
+        "Raios X",
+        "Insulina",
+        "CRISPR"
+      ],
+      "correta": 3,
+      "explicacao": "A edição de genes por CRISPR-Cas9.",
+      "fonte": "https://www.nobelprize.org/prizes/chemistry/2020/press-release/"
+    },
+    {
+      "id": "q20",
+      "enunciado": "Tu Youyou combateu qual doença?",
+      "alternativas": [
+        "Dengue",
+        "Sarampo",
+        "Malária",
+        "Tuberculose"
+      ],
+      "correta": 2,
+      "explicacao": "Achou a artemisinina. Nobel, 2015.",
+      "fonte": "https://pt.wikipedia.org/wiki/Tu_Youyou"
+    },
+    {
+      "id": "q21",
+      "enunciado": "Karikó ganhou Nobel por qual tecnologia?",
+      "alternativas": [
+        "CRISPR",
+        "RNA mensageiro",
+        "Raios X",
+        "Penicilina"
+      ],
+      "correta": 1,
+      "explicacao": "Base das vacinas de RNA. Nobel, 2023.",
+      "fonte": "https://www.nobelprize.org/prizes/medicine/2023/press-release/"
+    },
+    {
+      "id": "q22",
+      "enunciado": "Primeira mulher na Medalha Fields?",
+      "alternativas": [
+        "Maryam Mirzakhani",
+        "Emmy Noether",
+        "Hipátia",
+        "Ada Lovelace"
+      ],
+      "correta": 0,
+      "explicacao": "Matemática iraniana, em 2014.",
+      "fonte": "https://pt.wikipedia.org/wiki/Maryam_Mirzakhani"
+    },
+    {
+      "id": "q23",
+      "enunciado": "Matemática e filósofa de Alexandria?",
+      "alternativas": [
+        "Emmy Noether",
+        "Marie Curie",
+        "Mary Anning",
+        "Hipátia"
+      ],
+      "correta": 3,
+      "explicacao": "Viveu em Alexandria, no Egito romano.",
+      "fonte": "https://pt.wikipedia.org/wiki/Hip%C3%A1tia"
+    },
+    {
+      "id": "q24",
+      "enunciado": "Quem traduziu Newton para o francês?",
+      "alternativas": [
+        "Hipátia",
+        "Ada Lovelace",
+        "Émilie du Châtelet",
+        "Mary Anning"
+      ],
+      "correta": 2,
+      "explicacao": "Os Principia, no século XVIII.",
+      "fonte": "https://pt.wikipedia.org/wiki/%C3%89milie_du_Ch%C3%A2telet"
+    },
+    {
+      "id": "q25",
+      "enunciado": "Quem coletava fósseis em Lyme Regis?",
+      "alternativas": [
+        "Jane Goodall",
+        "Mary Anning",
+        "Rachel Carson",
+        "Vera Rubin"
+      ],
+      "correta": 1,
+      "explicacao": "Mary Anning, paleontóloga inglesa.",
+      "fonte": "https://pt.wikipedia.org/wiki/Mary_Anning"
+    },
+    {
+      "id": "q26",
+      "enunciado": "Quem achou indícios da matéria escura?",
+      "alternativas": [
+        "Vera Rubin",
+        "Jocelyn Bell",
+        "Henrietta Leavitt",
+        "Lise Meitner"
+      ],
+      "correta": 0,
+      "explicacao": "Ao medir a rotação de galáxias.",
+      "fonte": "https://pt.wikipedia.org/wiki/Vera_Rubin"
+    },
+    {
+      "id": "q27",
+      "enunciado": "Quem liderou o software da Apollo?",
+      "alternativas": [
+        "Katherine Johnson",
+        "Grace Hopper",
+        "Ada Lovelace",
+        "Margaret Hamilton"
+      ],
+      "correta": 3,
+      "explicacao": "Margaret Hamilton, no MIT, em 1969.",
+      "fonte": "https://en.wikipedia.org/wiki/Margaret_Hamilton_(software_engineer)"
+    },
+    {
+      "id": "q28",
+      "enunciado": "Quem ligou simetria e conservação?",
+      "alternativas": [
+        "Marie Curie",
+        "Hipátia",
+        "Emmy Noether",
+        "Vera Rubin"
+      ],
+      "correta": 2,
+      "explicacao": "Teorema de Noether, matemática alemã.",
+      "fonte": "https://pt.wikipedia.org/wiki/Emmy_Noether"
+    }
+  ]
+}

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Estrelas da Ciência</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { display: block; outline: none; image-rendering: crisp-edges; image-rendering: pixelated; }
+</style>
+</head>
+<body>
+<canvas id="tela" width="256" height="224" tabindex="0"></canvas>
+<script>
+/*
+ * Estrelas da Ciência — releitura de Space Invaders com mulheres na ciência.
+ *  - Um único HTML, sem rede, sem armazenamento (RJ-01, RJ-02, RJ-18).
+ *  - Resolução interna 256x224, escalada em número inteiro (pixel art, RJ-11).
+ *  - Só as teclas canônicas, sem auto-repeat, no máximo duas juntas (RJ-15, RJ-16).
+ *  - Partida curta: 6 rodadas (RJ-08).
+ */
+(() => {
+'use strict';
+
+// ---------- Constantes ----------
+const L = 256, A = 224, FPS = 60;
+const JOGO = 'estrelas-da-ciencia', VERSAO = '1.0.0', TEMA = 'Mulheres na Ciência';
+const RODADAS = 6;          // perguntas por partida
+const SEG_RODADA = 18;      // tempo para responder
+const FB_CERTO = 100;       // quadros de feedback quando acerta (~1,7 s)
+const FB_ERRO = 210;        // quadros de feedback quando erra (~3,5 s): tempo de ler a explicação
+const PLAYER_Y = 194;
+const BASES = [32, 96, 160, 224];
+const ALFABETO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+// Paleta fixa de 16 cores (limite do curso: 32). Sem gradiente, sem anti-aliasing.
+const PAL = ['#000000', '#1d2b53', '#7e2553', '#008751', '#ab5236', '#5f574f', '#c2c3c7', '#fff1e8',
+             '#ff004d', '#ffa300', '#ffec27', '#00e436', '#29adff', '#83769c', '#ff77a8', '#ffccaa'];
+const C = { preto: 0, azulEscuro: 1, ameixa: 2, verde: 3, marrom: 4, cinza: 5, cinzaClaro: 6, branco: 7,
+            vermelho: 8, laranja: 9, amarelo: 10, lima: 11, azul: 12, lavanda: 13, rosa: 14 };
+// Cada alternativa tem uma cor (e letra): ajuda a achar a nave certa sem ler tudo de novo.
+const COR_NAVE = [C.amarelo, C.lima, C.azul, C.rosa];
+const SOMBRA_NAVE = [C.laranja, C.verde, C.lavanda, C.ameixa];
+const LETRAS = ['A', 'B', 'C', 'D'];
+
+const cv = document.getElementById('tela');
+const ctx = cv.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+// ---------- Fonte bitmap 5x7 (sem anti-aliasing, legível de longe) ----------
+const FONTE_TXT = {
+  'A': '.###.|#...#|#...#|#####|#...#|#...#|#...#', 'B': '####.|#...#|#...#|####.|#...#|#...#|####.',
+  'C': '.###.|#...#|#....|#....|#....|#...#|.###.', 'D': '####.|#...#|#...#|#...#|#...#|#...#|####.',
+  'E': '#####|#....|#....|####.|#....|#....|#####', 'F': '#####|#....|#....|####.|#....|#....|#....',
+  'G': '.###.|#...#|#....|#.###|#...#|#...#|.###.', 'H': '#...#|#...#|#...#|#####|#...#|#...#|#...#',
+  'I': '.###.|..#..|..#..|..#..|..#..|..#..|.###.', 'J': '..###|...#.|...#.|...#.|...#.|#..#.|.##..',
+  'K': '#...#|#..#.|#.#..|##...|#.#..|#..#.|#...#', 'L': '#....|#....|#....|#....|#....|#....|#####',
+  'M': '#...#|##.##|#.#.#|#.#.#|#...#|#...#|#...#', 'N': '#...#|##..#|#.#.#|#..##|#...#|#...#|#...#',
+  'O': '.###.|#...#|#...#|#...#|#...#|#...#|.###.', 'P': '####.|#...#|#...#|####.|#....|#....|#....',
+  'Q': '.###.|#...#|#...#|#...#|#.#.#|#..#.|.##.#', 'R': '####.|#...#|#...#|####.|#.#..|#..#.|#...#',
+  'S': '.####|#....|#....|.###.|....#|....#|####.', 'T': '#####|..#..|..#..|..#..|..#..|..#..|..#..',
+  'U': '#...#|#...#|#...#|#...#|#...#|#...#|.###.', 'V': '#...#|#...#|#...#|#...#|#...#|.#.#.|..#..',
+  'W': '#...#|#...#|#...#|#.#.#|#.#.#|##.##|#...#', 'X': '#...#|#...#|.#.#.|..#..|.#.#.|#...#|#...#',
+  'Y': '#...#|#...#|.#.#.|..#..|..#..|..#..|..#..', 'Z': '#####|....#|...#.|..#..|.#...|#....|#####',
+  '0': '.###.|#...#|#..##|#.#.#|##..#|#...#|.###.', '1': '..#..|.##..|..#..|..#..|..#..|..#..|.###.',
+  '2': '.###.|#...#|....#|...#.|..#..|.#...|#####', '3': '#####|...#.|..#..|...#.|....#|#...#|.###.',
+  '4': '...#.|..##.|.#.#.|#..#.|#####|...#.|...#.', '5': '#####|#....|####.|....#|....#|#...#|.###.',
+  '6': '..##.|.#...|#....|####.|#...#|#...#|.###.', '7': '#####|....#|...#.|..#..|.#...|.#...|.#...',
+  '8': '.###.|#...#|#...#|.###.|#...#|#...#|.###.', '9': '.###.|#...#|#...#|.####|....#|...#.|.##..',
+  '?': '.###.|#...#|....#|...#.|..#..|.....|..#..', '!': '..#..|..#..|..#..|..#..|..#..|.....|..#..',
+  '.': '.....|.....|.....|.....|.....|.....|..#..', ',': '.....|.....|.....|.....|..#..|..#..|.#...',
+  ':': '.....|..#..|.....|.....|..#..|.....|.....', '-': '.....|.....|.....|#####|.....|.....|.....',
+  '+': '.....|..#..|..#..|#####|..#..|..#..|.....', '/': '....#|....#|...#.|..#..|.#...|#....|#....',
+  '%': '##..#|##.#.|...#.|..#..|.#...|.#.##|#..##', '(': '...#.|..#..|.#...|.#...|.#...|..#..|...#.',
+  ')': '.#...|..#..|...#.|...#.|...#.|..#..|.#...', ' ': '.....|.....|.....|.....|.....|.....|.....',
+};
+const FONTE = {};
+for (const k of Object.keys(FONTE_TXT)) FONTE[k] = FONTE_TXT[k].split('|');
+// Acentos: pixels (coluna, linha) relativos ao glifo; linhas negativas ficam acima dele.
+const MARCAS = {
+  '\u0301': [[3, -2], [2, -1]],                         // agudo
+  '\u0300': [[1, -2], [2, -1]],                         // grave
+  '\u0302': [[2, -2], [1, -1], [3, -1]],                // circunflexo
+  '\u0303': [[0, -1], [1, -2], [2, -1], [3, -2], [4, -1]], // til
+  '\u0327': [[2, 7], [1, 8]],                           // cedilha
+};
+
+function pintar(cor, x, y, w, h) {   // sempre em pixels inteiros
+  ctx.fillStyle = PAL[cor];
+  ctx.fillRect(x | 0, y | 0, w | 0, h | 0);
+}
+
+function largura(txt, s) { return txt.length * 6 * s - s; }
+
+function texto(txt, x, y, s, cor, alin) {
+  txt = String(txt);
+  if (alin === 'c') x = Math.floor((L - largura(txt, s)) / 2);
+  else if (alin === 'r') x = x - largura(txt, s);
+  for (let i = 0; i < txt.length; i++) {
+    const d = txt[i].normalize('NFD');
+    const linhas = FONTE[d[0].toUpperCase()] || FONTE['?'];
+    const gx = x + i * 6 * s;
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < 5; c++) {
+        if (linhas[r][c] === '#') pintar(cor, gx + c * s, y + r * s, s, s);
+      }
+    }
+    for (const m of d.slice(1)) {
+      for (const [px, py] of (MARCAS[m] || [])) pintar(cor, gx + px * s, y + py * s, s, s);
+    }
+  }
+}
+
+function quebrar(txt, max) {
+  const l = []; let a = '';
+  for (const p of txt.split(' ')) {
+    if (!a) a = p;
+    else if ((a + ' ' + p).length <= max) a += ' ' + p;
+    else { l.push(a); a = p; }
+  }
+  if (a) l.push(a);
+  return l;
+}
+
+// ---------- Sprites 16x16 (arte própria) ----------
+const SPRITE_JOGADORA = [
+  '.......ww.......',
+  '.......ww.......',
+  '......cwwc......',
+  '......cccc......',
+  '.....cccccc.....',
+  '.....cccccc.....',
+  '....cccBBccc....',
+  '...ccccBBcccc...',
+  '..cccccBBccccc..',
+  '.cccccccccccccc.',
+  '.ccc.cccccc.ccc.',
+  'ccc..cccccc..ccc',
+  'cc...cccccc...cc',
+  'c....rr..rr....c',
+  '.....oy..yo.....',
+  '......y..y......',
+];
+const SPRITE_NAVE = [
+  '..g..........g..',
+  '...g........g...',
+  '...gggggggggg...',
+  '..gggggggggggg..',
+  '.ggwwwggggwwwgg.',
+  '.ggwkwggggwkwgg.',
+  '.ggwwwggggwwwgg.',
+  'gggggggggggggggg',
+  'gggggggggggggggg',
+  'gGgggg.gg.ggggGg',
+  'g.ggg......ggg.g',
+  'g..gg......gg..g',
+  '...ggg....ggg...',
+  '..gg........gg..',
+  '.gg..........gg.',
+  '................',
+];
+
+function sprite(linhas, x, y, mapa) {
+  for (let r = 0; r < linhas.length; r++) {
+    for (let c = 0; c < linhas[r].length; c++) {
+      const ch = linhas[r][c];
+      if (ch !== '.') pintar(mapa[ch], x + c, y + r, 1, 1);
+    }
+  }
+}
+const MAPA_JOGADORA = { c: C.cinzaClaro, B: C.azul, w: C.branco, r: C.vermelho, o: C.laranja, y: C.amarelo };
+function desenharNave(cx, y, i) {
+  sprite(SPRITE_NAVE, cx - 8, y, { g: COR_NAVE[i], G: SOMBRA_NAVE[i], w: C.branco, k: C.azulEscuro });
+}
+
+// ---------- Estrelas de fundo (deterministas) ----------
+const ESTRELAS = [];
+(() => {
+  let s = 12345;
+  const rnd = () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  for (let i = 0; i < 36; i++) {
+    ESTRELAS.push({ x: Math.floor(rnd() * L), y: Math.floor(rnd() * A), v: 3 + Math.floor(rnd() * 5),
+                    c: [C.azulEscuro, C.cinza, C.cinza, C.branco][Math.floor(rnd() * 4)] });
+  }
+})();
+
+// ---------- Estado ----------
+let fase = 'carregando';   // carregando | titulo | jogo | apelido | fim | erro
+let quadro = 0;
+let banco = null;
+let apelidoInicial = null; // vindo de ARCADE_INIT, se o fliperama mandar
+let P = null;              // partida
+let R = null;              // rodada
+let bala = null;
+let explosoes = [];
+let apel = null;           // tela de apelido
+let fim = null;            // resultado da partida
+const teclas = new Set();  // teclas físicas seguradas (no máximo 2)
+
+// ---------- Teclado: só as teclas canônicas ----------
+const NOME_TECLA = { ArrowLeft: 'esquerda', ArrowRight: 'direita', ArrowUp: 'cima', ArrowDown: 'baixo',
+                     Space: 'acao', KeyZ: 'acao', KeyX: 'acao2', Enter: 'enter' };
+
+window.addEventListener('keydown', (e) => {
+  const nome = NOME_TECLA[e.code];
+  if (!nome) return;                       // qualquer outra tecla é ignorada
+  e.preventDefault();
+  if (e.repeat) return;                    // auto-repeat nunca vira ação (RJ-16)
+  if (!teclas.has(e.code) && teclas.size >= 2) return; // no máximo duas juntas (RJ-16)
+  teclas.add(e.code);
+  aoApertar(nome);
+});
+window.addEventListener('keyup', (e) => { teclas.delete(e.code); });
+window.addEventListener('blur', () => { teclas.clear(); });
+
+// ---------- Mensagens do fliperama ----------
+window.addEventListener('message', (e) => {
+  if (e.source !== window.parent) return;
+  const d = e.data;
+  if (d && d.tipo === 'ARCADE_INIT' && typeof d.jogador === 'string' && /^[A-Z0-9]{1,9}$/.test(d.jogador)) {
+    apelidoInicial = d.jogador;            // só pré-preenche a tela de apelido
+  }
+});
+
+function enviarPlacar(jogador) {
+  const msg = {
+    tipo: 'PLACAR', jogo: JOGO, versao: VERSAO,
+    pontos: Math.max(0, Math.round(P.pontos)),
+    duracao_s: Math.round(P.quadros / FPS),
+    acertos: P.acertos, erros: P.erros, tema: TEMA,
+  };
+  if (jogador) msg.jogador = jogador;      // sem apelido, a API grava ANON
+  window.parent.postMessage(msg, '*');
+}
+
+// ---------- Perguntas ----------
+function embaralhar(v) {
+  const a = v.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+fetch('questoes.json')
+  .then((r) => { if (!r.ok) throw new Error('http'); return r.json(); })
+  .then((d) => {
+    const ok = d && Array.isArray(d.questoes) && d.questoes.length >= RODADAS &&
+      d.questoes.every((q) => Array.isArray(q.alternativas) && q.alternativas.length === 4);
+    if (!ok) throw new Error('formato');
+    banco = d.questoes.map((q) => ({
+      id: q.id, enunciado: q.enunciado.normalize('NFC'), correta: q.correta,
+      alternativas: q.alternativas.map((a) => a.normalize('NFC')),
+      explicacao: q.explicacao.normalize('NFC'),
+    }));
+    fase = 'titulo';
+  })
+  .catch(() => { fase = 'erro'; });
+
+// ---------- Partida ----------
+function iniciarPartida() {
+  P = { pontos: 0, acertos: 0, erros: 0, quadros: 0, x: L / 2, rodada: 0,
+        perguntas: embaralhar(banco).slice(0, RODADAS) }; // sorteadas, sem repetir
+  bala = null; explosoes = [];
+  novaRodada();
+  fase = 'jogo';
+}
+
+function novaRodada() {
+  const q = P.perguntas[P.rodada];
+  const ordem = embaralhar([0, 1, 2, 3]);
+  R = { num: P.rodada + 1, q, fase: 'resp', total: SEG_RODADA * FPS, restante: SEG_RODADA * FPS, relogio: 0, fb: null,
+        naves: ordem.map((alt, i) => ({ i, alt, x: BASES[i], y: 150 })) };
+  posicionarNaves();
+}
+
+function posicionarNaves() {
+  const balanco = Math.round(Math.sin(R.relogio / FPS * Math.PI * 2 / 5) * 18);
+  const t = 1 - R.restante / R.total;
+  for (const n of R.naves) {
+    n.x = BASES[n.i] + (n.i % 2 ? -balanco : balanco);
+    n.y = 150 + Math.floor(26 * t);
+  }
+}
+
+function terminarRodada(nave) {
+  const acertou = !!nave && nave.alt === R.q.correta;
+  let delta;
+  if (acertou) {
+    delta = 100 + Math.round(R.restante / R.total * 10) * 10; // bônus por rapidez
+    P.acertos++;
+  } else {
+    delta = -Math.min(30, P.pontos);                          // errar custa pontos, nunca a partida
+    P.erros++;
+  }
+  P.pontos += delta;
+  if (nave) explosoes.push({ x: nave.x, y: nave.y + 8, t: 0 });
+  R.fb = { acertou, tempo: !nave, delta, quadros: acertou ? FB_CERTO : FB_ERRO };
+  R.fase = 'fb';
+  bala = null;
+}
+
+function proximaRodada() {
+  P.rodada++;
+  if (P.rodada >= RODADAS) {
+    apel = { letras: apelidoInicial ? apelidoInicial.split('') : ['A'], ocioso: 0, guarda: 40 };
+    fase = 'apelido';
+  } else {
+    novaRodada();
+  }
+}
+
+function concluir(jogador) {
+  enviarPlacar(jogador);
+  fim = { jogador, pontos: P.pontos, acertos: P.acertos, erros: P.erros, guarda: 60 };
+  fase = 'fim';
+}
+
+function aoApertar(nome) {
+  if (fase === 'titulo') {
+    if (nome === 'enter' || nome === 'acao') iniciarPartida();
+  } else if (fase === 'jogo') {
+    if (nome === 'acao' && R.fase === 'resp' && !bala) bala = { x: P.x, y: PLAYER_Y - 6 };
+  } else if (fase === 'apelido') {
+    apel.ocioso = 0;
+    const l = apel.letras, u = l.length - 1;
+    if (nome === 'cima') l[u] = ALFABETO[(ALFABETO.indexOf(l[u]) + 1) % ALFABETO.length];
+    else if (nome === 'baixo') l[u] = ALFABETO[(ALFABETO.indexOf(l[u]) + ALFABETO.length - 1) % ALFABETO.length];
+    else if (nome === 'direita') { if (l.length < 9) l.push(l[u]); }
+    else if (nome === 'esquerda') { if (l.length > 1) l.pop(); }
+    else if (apel.guarda <= 0 && nome === 'enter') concluir(l.join(''));
+    else if (apel.guarda <= 0 && nome === 'acao2') concluir(null);
+  } else if (fase === 'fim') {
+    if (fim.guarda <= 0 && nome === 'enter') iniciarPartida();
+  }
+}
+
+// ---------- Atualização (60 quadros por segundo) ----------
+function atualizar() {
+  quadro++;
+  if (fase === 'jogo') {
+    P.quadros++;
+    const dir = (teclas.has('ArrowRight') ? 1 : 0) - (teclas.has('ArrowLeft') ? 1 : 0);
+    P.x = Math.max(8, Math.min(L - 8, P.x + dir * 2));
+    explosoes = explosoes.filter((e) => ++e.t < 20);
+    if (R.fase === 'resp') {
+      R.restante--; R.relogio++;
+      posicionarNaves();
+      if (bala) {
+        bala.y -= 4;
+        const hit = R.naves.find((n) => bala.x + 1 >= n.x - 8 && bala.x <= n.x + 8 && bala.y <= n.y + 16 && bala.y + 6 >= n.y);
+        if (hit) terminarRodada(hit);
+        else if (bala.y < 120) bala = null;
+      }
+      if (R.fase === 'resp' && R.restante <= 0) terminarRodada(null);
+    } else if (--R.fb.quadros <= 0) {
+      proximaRodada();
+    }
+  } else if (fase === 'apelido') {
+    if (apel.guarda > 0) apel.guarda--;
+    if (++apel.ocioso > 20 * FPS) concluir(null);   // ninguém por perto: envia como ANON
+  } else if (fase === 'fim') {
+    if (fim.guarda > 0) fim.guarda--;
+  }
+}
+
+// ---------- Desenho ----------
+function estrelas(ymin, ymax) {
+  for (const s of ESTRELAS) {
+    const y = (s.y + Math.floor(quadro / (s.v * 6))) % A;
+    if (y >= ymin && y < ymax) pintar(s.c, s.x, y, 1, 1);
+  }
+}
+function piscando() { return Math.floor(quadro / 30) % 2 === 0; }
+
+function desenharJogadora() { sprite(SPRITE_JOGADORA, Math.floor(P.x) - 8, PLAYER_Y, MAPA_JOGADORA); }
+
+function desenharExplosoes() {
+  for (const e of explosoes) {
+    const r = 2 + Math.floor(e.t / 2);
+    const cor = e.t < 6 ? C.branco : e.t < 12 ? C.amarelo : C.laranja;
+    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r], [0, -r - 2], [0, r + 2], [-r - 2, 0], [r + 2, 0]]) {
+      pintar(cor, e.x + dx - 1, e.y + dy - 1, 2, 2);
+    }
+  }
+}
+
+function desenharJogo() {
+  estrelas(134, 210);
+  // HUD
+  texto('PONTOS ' + P.pontos, 4, 3, 2, C.branco);
+  texto(R.num + '/' + RODADAS, L - 4, 3, 2, C.branco, 'r');
+  // barra do tempo
+  pintar(C.cinza, 4, 20, 248, 4);
+  const frac = R.restante / R.total;
+  pintar(frac > 0.5 ? C.lima : frac > 0.25 ? C.amarelo : C.vermelho, 4, 20, Math.floor(248 * frac), 4);
+  // pergunta (sempre visível, faz parte da mecânica)
+  quebrar(R.q.enunciado, 21).forEach((ln, i) => texto(ln, 4, 32 + i * 16, 2, C.branco));
+
+  if (R.fase === 'resp') {
+    R.naves.forEach((n, i) => {
+      texto(LETRAS[i] + ' ' + R.q.alternativas[n.alt], 4, 68 + i * 16, 2, COR_NAVE[i]);
+    });
+    R.naves.forEach((n) => {
+      desenharNave(n.x, n.y, n.i);
+      texto(LETRAS[n.i], n.x - 5, n.y - 17, 2, COR_NAVE[n.i]);
+    });
+    if (bala) pintar(C.branco, bala.x, bala.y, 2, 6);
+  } else {
+    const f = R.fb;
+    const certa = R.q.alternativas[R.q.correta];
+    if (f.acertou) {
+      texto('CERTO!', 0, 76, 3, C.lima, 'c');
+      texto('+' + f.delta + ' PONTOS', 0, 102, 2, C.amarelo, 'c');
+      quebrar(R.q.explicacao, 21).forEach((ln, i) => texto(ln, 4, 132 + i * 18, 2, C.branco));
+    } else {
+      texto(f.tempo ? 'TEMPO!' : 'ERROU!', 0, 68, 3, f.tempo ? C.laranja : C.vermelho, 'c');
+      texto((f.delta === 0 ? '0' : f.delta) + ' PONTOS', 0, 92, 2, C.branco, 'c');
+      texto('RESPOSTA:', 0, 112, 2, C.amarelo, 'c');
+      texto(certa, 0, 130, 2, C.lima, 'c');
+      quebrar(R.q.explicacao, 21).forEach((ln, i) => texto(ln, 4, 152 + i * 18, 2, C.branco));
+    }
+  }
+  desenharExplosoes();
+  desenharJogadora();
+  pintar(C.cinza, 0, 212, L, 2);
+  texto('SETAS MOVEM  ESPAÇO ATIRA', 0, 216, 1, C.cinzaClaro, 'c');
+}
+
+function desenharTitulo() {
+  estrelas(0, A);
+  texto('ESTRELAS', 0, 22, 3, C.amarelo, 'c');
+  texto('DA CIÊNCIA', 0, 52, 3, C.amarelo, 'c');
+  texto('MULHERES NA CIÊNCIA', 0, 88, 2, C.rosa, 'c');
+  for (let i = 0; i < 4; i++) {
+    texto(LETRAS[i], BASES[i] - 5, 108, 2, COR_NAVE[i]);
+    desenharNave(BASES[i], 126, i);
+  }
+  texto('ACERTE A RESPOSTA!', 0, 148, 2, C.branco, 'c');
+  texto('SETAS MOVEM', 0, 168, 2, C.cinzaClaro, 'c');
+  texto('ESPAÇO ATIRA', 0, 184, 2, C.cinzaClaro, 'c');
+  if (piscando()) texto('APERTE ENTER', 0, 208, 2, C.lima, 'c');
+}
+
+function desenharApelido() {
+  texto('SEU APELIDO', 0, 14, 3, C.amarelo, 'c');
+  const l = apel.letras, w = l.length * 18 - 3, x0 = Math.floor((L - w) / 2);
+  l.forEach((ch, i) => texto(ch, x0 + i * 18, 52, 3, i === l.length - 1 ? C.lima : C.branco));
+  if (piscando()) pintar(C.lima, x0 + (l.length - 1) * 18, 76, 15, 3);
+  texto('CIMA/BAIXO: LETRA', 0, 100, 2, C.branco, 'c');
+  texto('DIREITA: AVANÇA', 0, 120, 2, C.branco, 'c');
+  texto('ESQUERDA: APAGA', 0, 140, 2, C.branco, 'c');
+  texto('ENTER: CONFIRMA', 0, 160, 2, C.lima, 'c');
+  texto('X: PULAR', 0, 180, 2, C.cinzaClaro, 'c');
+  texto('O APELIDO APARECE NO RANKING', 0, 208, 1, C.cinzaClaro, 'c');
+}
+
+function desenharFim() {
+  texto('FIM DE JOGO', 0, 16, 3, C.amarelo, 'c');
+  if (fim.jogador) texto(fim.jogador, 0, 50, 2, C.branco, 'c');
+  texto('PONTOS', 0, 80, 2, C.cinzaClaro, 'c');
+  texto(String(fim.pontos), 0, 100, 3, C.amarelo, 'c');
+  texto('ACERTOS ' + fim.acertos, 0, 136, 2, C.lima, 'c');
+  texto('ERROS ' + fim.erros, 0, 156, 2, C.vermelho, 'c');
+  texto('PLACAR ENVIADO!', 0, 182, 2, C.azul, 'c');
+  if (piscando() && fim.guarda <= 0) texto('ENTER: JOGAR DE NOVO', 0, 202, 2, C.lima, 'c');
+}
+
+function desenhar() {
+  pintar(C.preto, 0, 0, L, A);
+  if (fase === 'carregando') texto('CARREGANDO...', 0, 104, 2, C.branco, 'c');
+  else if (fase === 'erro') {
+    texto('NÃO FOI POSSÍVEL', 0, 88, 2, C.vermelho, 'c');
+    texto('CARREGAR O JOGO.', 0, 108, 2, C.branco, 'c');
+  }
+  else if (fase === 'titulo') desenharTitulo();
+  else if (fase === 'jogo') desenharJogo();
+  else if (fase === 'apelido') desenharApelido();
+  else if (fase === 'fim') desenharFim();
+}
+
+// ---------- Tela e laço ----------
+function ajustar() {
+  let s = Math.floor(Math.min(window.innerWidth / L, window.innerHeight / A));
+  if (s < 1) s = Math.min(window.innerWidth / L, window.innerHeight / A); // tela minúscula: reduz sem cortar
+  cv.style.width = (L * s) + 'px';
+  cv.style.height = (A * s) + 'px';
+}
+window.addEventListener('resize', ajustar);
+ajustar();
+window.focus();
+cv.focus();
+
+let ultimo = 0, acc = 0;
+function laco(t) {
+  if (!ultimo) ultimo = t;
+  acc += Math.min(100, t - ultimo);
+  ultimo = t;
+  while (acc >= 1000 / FPS) { atualizar(); acc -= 1000 / FPS; }
+  desenhar();
+  window.requestAnimationFrame(laco);
+}
+window.requestAnimationFrame(laco);
+})();
+</script>
+</body>
+</html>
